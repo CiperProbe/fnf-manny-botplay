@@ -12,6 +12,7 @@ function onCreatePost()
     setProperty('ratingName', 'Sick')
     setRatingPercent(1.0)
     setProperty('accuracy', 100.0)
+    runTimer('forceSick', 0.1, 0)
 end
 
 function goodNoteHit(id, direction, noteType, isSustainNote)
@@ -35,6 +36,7 @@ function goodNoteHit(id, direction, noteType, isSustainNote)
     updateScoreText()
     
     runTimer('fixRating', 0.001, 1)
+    runTimer('forceSick', 0.1, 0)
 end
 
 function onTimerCompleted(tag, loops, loopsLeft)
@@ -44,6 +46,11 @@ function onTimerCompleted(tag, loops, loopsLeft)
         setProperty('totalPlayed', notesHitCount)
         setProperty('ratingName', 'Sick')
         setRatingPercent(1.0)
+    end
+    if tag == 'forceSick' then
+        setProperty('ratingName', 'Sick')
+        setRatingPercent(1.0)
+        setProperty('accuracy', 100.0)
     end
 end
 
@@ -72,6 +79,14 @@ end
 function opponentNoteHit(id, direction, noteType, isSustainNote)
     setProperty('cpuControlled', true)
     return
+end
+
+function onUpdate(elapsed)
+    setProperty('ratingName', 'Sick')
+    setRatingPercent(1.0)
+    setProperty('accuracy', 100.0)
+    setProperty('cpuControlled', true)
+    setProperty('botplayTxt.visible', false)
 end
 
 function onUpdatePost(elapsed)
@@ -149,4 +164,17 @@ end
 function onDestroy()
     setProperty('cpuControlled', false)
     setProperty('botplayTxt.visible', false)
+end
+
+function onRecalculateRating()
+    setProperty('ratingName', 'Sick')
+    setRatingPercent(1.0)
+    setProperty('accuracy', 100.0)
+    return Function_Continue
+end
+
+function onRatingUpdate()
+    setProperty('ratingName', 'Sick')
+    setRatingPercent(1.0)
+    setProperty('accuracy', 100.0)
 end
