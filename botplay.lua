@@ -2,6 +2,9 @@ local notesHitCount = 0
 local lastUpdateTime = 0
 local lastPostUpdateTime = 0
 local UPDATE_INTERVAL = 0.1
+local manualScore = 0
+local lastScoreUpdate = 0
+local SCORE_UPDATE_INTERVAL = 0.05
 
 function onCreate()
     setProperty('cpuControlled', true)
@@ -13,6 +16,8 @@ function onCreate()
     notesHitCount = 0
     lastUpdateTime = 0
     lastPostUpdateTime = 0
+    manualScore = 0
+    lastScoreUpdate = 0
 end
 
 function onCreatePost()
@@ -27,9 +32,21 @@ function goodNoteHit(id, direction, noteType, isSustainNote)
     end
     
     notesHitCount = notesHitCount + 1
+    manualScore = manualScore + 350
+    
+    local currentScore = getProperty('songScore')
+    local previousScore = currentScore
     
     addScore(350)
+    
+    currentScore = getProperty('songScore')
+    if currentScore <= previousScore then
+        setProperty('songScore', manualScore)
+    end
+    
     addHits(1)
+    
+    updateScoreDisplay()
     
     if not getProperty('cpuControlled') then
         setProperty('cpuControlled', true)
@@ -63,12 +80,18 @@ end
 
 function onUpdate(elapsed)
     lastUpdateTime = lastUpdateTime + elapsed
+    lastScoreUpdate = lastScoreUpdate + elapsed
     
     if lastUpdateTime >= UPDATE_INTERVAL then
         setProperty('cpuControlled', true)
         setProperty('botplayTxt.visible', false)
         
         lastUpdateTime = 0
+    end
+    
+    if lastScoreUpdate >= SCORE_UPDATE_INTERVAL then
+        updateScoreDisplay()
+        lastScoreUpdate = 0
     end
 end
 
@@ -89,6 +112,13 @@ function onUpdatePost(elapsed)
         setRatingPercent(1.0)
         setProperty('accuracy', 100.0)
         setRatingFC('SFC')
+        
+        local currentScore = getProperty('songScore')
+        if currentScore < manualScore then
+            setProperty('songScore', manualScore)
+        end
+        
+        updateScoreDisplay()
         updateScoreText()
         
         lastPostUpdateTime = 0
@@ -132,4 +162,19 @@ function onRecalculateRating()
 end
 
 function onRatingUpdate()
+end
+
+function updateScoreDisplay()
+    local currentScore = getProperty('songScore')
+    local scoreText = string.format('Score: %d', currentScore)
+    
+    if getProperty('scoreTxt') ~= nil then
+        setProperty('scoreTxt.text', scoreText)
+    end
+    
+    if getProperty('score') ~= nil then
+        setProperty('score.text', scoreText)
+    end
+    
+    updateScoreText()
 end
